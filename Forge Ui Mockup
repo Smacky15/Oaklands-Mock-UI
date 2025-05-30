@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mock UI</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle, #440000 1px, #121212 1px);
+      background-size: 10px 10px;
+      color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .ui-container {
+      background: #1f1f1f;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      width: 350px;
+    }
+    .ui-header {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: bold;
+    }
+    .ui-section {
+      margin-bottom: 1rem;
+    }
+    .ui-label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: bold;
+    }
+    .ui-box-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ui-box {
+      background: #2a2a2a;
+      padding: 0.75rem;
+      border-radius: 6px;
+      width: 45%;
+      text-align: center;
+    }
+    .ui-progress {
+      background: #333;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 20px;
+      margin-top: 0.5rem;
+    }
+    .ui-progress-bar {
+      height: 100%;
+      background: orange;
+      width: 0%;
+    }
+    .ui-footer {
+      font-size: 0.9rem;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #aaa;
+    }
+    .transition-arrow {
+      display: inline-block;
+      font-weight: bold;
+      animation: arrow-flicker 1s infinite;
+    }
+    @keyframes arrow-flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .toggle-container label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="ui-container">
+    <div class="ui-header">Steel Forge</div>
+    <div class="ui-section">
+      <div class="ui-label">Currently Processing</div>
+      <div class="ui-box-container">
+        <div class="ui-box">Refined Iron</div>
+        <div class="ui-box">Iron Ingot</div>
+      </div>
+      <div style="text-align:center; margin-top: 0.25rem;">
+        <span class="transition-arrow">&gt;&gt;&gt;</span>
+      </div>
+      <div class="ui-progress">
+        <div class="ui-progress-bar" id="progress-bar"></div>
+      </div>
+    </div>
+    <div class="ui-section">
+      <div class="ui-label">Next in Queue</div>
+      <div class="ui-box">Refined Tin</div>
+    </div>
+    <div class="ui-section">
+      <div class="ui-label">Current Power Usage</div>
+      <div class="ui-box" id="power-usage">0W</div>
+    </div>
+    <div class="toggle-container">
+      <label for="toggle">Power</label>
+      <input type="checkbox" id="toggle" />
+    </div>
+    <div class="ui-footer">UI Mockup - No Functionality</div>
+  </div>
+
+  <script>
+    const progressBar = document.getElementById('progress-bar');
+    const powerUsage = document.getElementById('power-usage');
+    const toggle = document.getElementById('toggle');
+
+    const currentLeft = document.querySelectorAll('.ui-box')[0];
+    const currentRight = document.querySelectorAll('.ui-box')[1];
+    const nextBox = document.querySelectorAll('.ui-box')[2];
+
+    let interval;
+    let active = false;
+
+    const materialQueue = [
+      { input: 'Iron Ingot', output: 'Refined Iron' },
+      { input: 'Tin Ingot', output: 'Refined Tin' },
+      { input: 'Copper Ingot', output: 'Refined Copper' }
+    ];
+
+    function updateUI(current, next) {
+      currentLeft.innerText = current.output;
+      currentRight.innerText = current.input;
+      nextBox.innerText = next ? next.output : 'None';
+    }
+
+    toggle.addEventListener('change', () => {
+      active = toggle.checked;
+      if (active) {
+        startNextMaterial();
+      } else {
+        clearInterval(interval);
+        progressBar.style.width = '0%';
+        powerUsage.innerText = '0W';
+      }
+    });
+
+    function startNextMaterial() {
+      if (!materialQueue.length) {
+        toggle.checked = false;
+        powerUsage.innerText = '0W';
+        return;
+      }
+
+      const current = materialQueue.shift();
+      const next = materialQueue[0];
+      updateUI(current, next);
+
+      let progress = 0;
+      interval = setInterval(() => {
+        progress += 1;
+        progressBar.style.width = progress + '%';
+        powerUsage.innerText = Math.floor(75 + 25 * (progress / 100)) + 'W';
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            progressBar.style.width = '0%';
+            powerUsage.innerText = '75W';
+            startNextMaterial();
+          }, 300);
+        }
+      }, 26);
+    }
+  </script>
+</body>
+</html>
